@@ -273,6 +273,37 @@ export interface GetBatchCommentsResponseSchema {
   }[];
 }
 
+export interface TradeSchema {
+  id: string;
+  walletAddress: string;
+  txHash: string;
+  chainId: number;
+  tokenInAddress: string;
+  tokenOutAddress: string;
+  amountIn: string;
+  amountOut: string;
+  usdValue: number;
+  protocol: string;
+  timestamp: number;
+}
+
+export interface LogTradeResponseSchema {
+  success: boolean;
+  trade: TradeSchema;
+}
+
+export interface GetWalletTradesResponseSchema {
+  trades: TradeSchema[];
+  page: number;
+  pageSize: number;
+}
+
+export interface GetAllTradesResponseSchema {
+  trades: TradeSchema[];
+  page: number;
+  pageSize: number;
+}
+
 export interface ContactSchema {
   /** @minLength 1 */
   id: string;
@@ -1926,6 +1957,31 @@ export interface ProfilesListParams4 {
 
 export type ProfilesListOutput = GetProfilesResponseSchema;
 
+export interface TradesLogCreateParams {
+  apiKey?: string;
+}
+
+export type TradesLogCreateData = LogTradeResponseSchema;
+
+export interface TradesFetchTransactionHistoryListParams {
+  apiKey?: string;
+  walletAddress: string;
+  page?: string;
+  pageSize?: string;
+}
+
+export type TradesFetchTransactionHistoryListData = GetWalletTradesResponseSchema;
+
+export interface TradesAllTradesListParams {
+  apiKey?: string;
+  startTime?: string;
+  endTime?: string;
+  page?: string;
+  pageSize?: string;
+}
+
+export type TradesAllTradesListData = GetAllTradesResponseSchema;
+
 import type { AxiosInstance, AxiosRequestConfig, HeadersDefaults, ResponseType } from 'axios';
 import axios from 'axios';
 
@@ -3035,6 +3091,77 @@ export class SocialFi<SecurityDataType extends unknown> extends HttpClient<Secur
         }
       >({
         path: `/activity/swap`,
+        method: 'GET',
+        query: query,
+        format: 'json',
+        ...params,
+      }),
+  };
+  trades = {
+    /**
+     * @description Log a trade transaction
+     *
+     * @tags Trades
+     * @name TradesLogCreate
+     * @summary Log a trade transaction
+     * @request POST:/trades/
+     */
+    tradesLogCreate: (data: TradeSchema, params: RequestParams = {}) =>
+      this.request<
+        TradesLogCreateData,
+        {
+          error: string;
+        }
+      >({
+        path: `/trades/`,
+        method: 'POST',
+        body: data,
+        type: ContentType.Json,
+        format: 'json',
+        ...params,
+      }),
+
+    /**
+     * @description Fetch transaction history for a wallet
+     *
+     * @tags Trades
+     * @name TradesFetchTransactionHistoryList
+     * @summary Fetch transaction history for a wallet
+     * @request GET:/trades/fetch-transaction-history
+     */
+    tradesFetchTransactionHistoryList: (
+      query: TradesFetchTransactionHistoryListParams,
+      params: RequestParams = {},
+    ) =>
+      this.request<
+        TradesFetchTransactionHistoryListData,
+        {
+          error: string;
+        }
+      >({
+        path: `/trades/fetch-transaction-history`,
+        method: 'GET',
+        query: query,
+        format: 'json',
+        ...params,
+      }),
+
+    /**
+     * @description Get all trades in a time period
+     *
+     * @tags Trades
+     * @name TradesAllTradesList
+     * @summary Get all trades in a time period
+     * @request GET:/trades/all-trades
+     */
+    tradesAllTradesList: (query: TradesAllTradesListParams, params: RequestParams = {}) =>
+      this.request<
+        TradesAllTradesListData,
+        {
+          error: string;
+        }
+      >({
+        path: `/trades/all-trades`,
         method: 'GET',
         query: query,
         format: 'json',
