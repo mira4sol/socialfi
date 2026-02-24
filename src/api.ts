@@ -1884,6 +1884,14 @@ export interface FeedListParams {
 
 export type FeedListData = GetActivityFeedResponseSchema;
 
+export interface GlobalFeedListParams {
+  apiKey: string;
+  page?: string;
+  pageSize?: string;
+}
+
+export type GlobalFeedListData = GetActivityFeedResponseSchema;
+
 export interface SwapListParams {
   apiKey: string;
   username?: string;
@@ -1923,8 +1931,10 @@ import axios from 'axios';
 
 export type QueryParamsType = Record<string | number, any>;
 
-export interface FullRequestParams
-  extends Omit<AxiosRequestConfig, 'data' | 'params' | 'url' | 'responseType'> {
+export interface FullRequestParams extends Omit<
+  AxiosRequestConfig,
+  'data' | 'params' | 'url' | 'responseType'
+> {
   /** set parameter to `true` for call `securityWorker` for this request */
   secure?: boolean;
   /** request path */
@@ -1941,8 +1951,10 @@ export interface FullRequestParams
 
 export type RequestParams = Omit<FullRequestParams, 'body' | 'method' | 'query' | 'path'>;
 
-export interface ApiConfig<SecurityDataType = unknown>
-  extends Omit<AxiosRequestConfig, 'data' | 'cancelToken'> {
+export interface ApiConfig<SecurityDataType = unknown> extends Omit<
+  AxiosRequestConfig,
+  'data' | 'cancelToken'
+> {
   securityWorker?: (
     securityData: SecurityDataType | null,
   ) => Promise<AxiosRequestConfig | void> | AxiosRequestConfig | void;
@@ -2972,6 +2984,28 @@ export class SocialFi<SecurityDataType extends unknown> extends HttpClient<Secur
         }
       >({
         path: `/activity/feed`,
+        method: 'GET',
+        query: query,
+        format: 'json',
+        ...params,
+      }),
+
+    /**
+     * @description Get global activity feed including follows, content, likes, comments and new followers
+     *
+     * @tags Activity
+     * @name GlobalFeedList
+     * @summary Get global activity feed
+     * @request GET:/activity/global
+     */
+    globalFeedList: (query: GlobalFeedListParams, params: RequestParams = {}) =>
+      this.request<
+        GlobalFeedListData,
+        {
+          error: string;
+        }
+      >({
+        path: `/activity/global`,
         method: 'GET',
         query: query,
         format: 'json',
