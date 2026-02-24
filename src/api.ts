@@ -1955,6 +1955,7 @@ export interface ApiConfig<SecurityDataType = unknown> extends Omit<
   AxiosRequestConfig,
   'data' | 'cancelToken'
 > {
+  apiKey?: string;
   securityWorker?: (
     securityData: SecurityDataType | null,
   ) => Promise<AxiosRequestConfig | void> | AxiosRequestConfig | void;
@@ -1975,11 +1976,13 @@ export class HttpClient<SecurityDataType = unknown> {
   private securityWorker?: ApiConfig<SecurityDataType>['securityWorker'];
   private secure?: boolean;
   private format?: ResponseType;
+  private apiKey?: string;
 
   constructor({
     securityWorker,
     secure,
     format,
+    apiKey,
     ...axiosConfig
   }: ApiConfig<SecurityDataType> = {}) {
     this.instance = axios.create({
@@ -1989,6 +1992,7 @@ export class HttpClient<SecurityDataType = unknown> {
     this.secure = secure;
     this.format = format;
     this.securityWorker = securityWorker;
+    this.apiKey = apiKey;
   }
 
   public setSecurityData = (data: SecurityDataType | null) => {
@@ -2072,7 +2076,10 @@ export class HttpClient<SecurityDataType = unknown> {
           ...(requestParams.headers || {}),
           ...(type ? { 'Content-Type': type } : {}),
         },
-        params: query,
+        params: {
+          ...(this.apiKey ? { apiKey: this.apiKey } : {}),
+          ...(query || {}),
+        },
         responseType: responseFormat,
         data: body,
         url: path,
